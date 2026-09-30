@@ -2,6 +2,7 @@ package com.ticket.userservice.controller;
 
 import com.ticket.userservice.dto.request.LoginRequest;
 import com.ticket.userservice.dto.request.SignUpRequest;
+import com.ticket.userservice.dto.response.LoginResponse;
 import com.ticket.userservice.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -23,5 +24,10 @@ public class UserController {
     @GetMapping("/health")
     public ResponseEntity<String> health() {
         return ResponseEntity.ok("user-service is running");
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
+        return ResponseEntity.ok(userService.login(request));
     }
 }

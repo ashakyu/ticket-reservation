@@ -1,5 +1,6 @@
 package com.ticket.userservice.service;
 
+import com.ticket.userservice.common.JwtTokenProvider;
 import com.ticket.userservice.domain.entity.User;
 import com.ticket.userservice.domain.entity.UserRole;
 import com.ticket.userservice.dto.request.LoginRequest;
@@ -17,6 +18,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtTokenProvider jwtTokenProvider;
 
     @Transactional
     public void signUp(SignUpRequest request) {
@@ -39,5 +41,18 @@ public class UserService {
     public User findByEmail(String email) {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+    }
+
+    @Transactional(readOnly = true)
+    public LoginResponse login(LoginRequest request) {
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+        }
+
+        String token = jwtTokenProvider.generateToken(user.getEmail(), user.getRole().name());
+        return new LoginResponse(token, user.getEmail(), user.getName());
     }
 }
